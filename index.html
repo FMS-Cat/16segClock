@@ -1,0 +1,731 @@
+<!DOCTYPE html>
+
+<html>
+	<head>
+		<meta charset="UTF-8">
+		<link href='http://fonts.googleapis.com/css?family=Roboto:500' rel='stylesheet' type='text/css'>
+		<style type="text/css">
+		#info
+		{
+			font-family:'Roboto',sans-serif;
+			font-size:14px;
+			line-height:16px;
+			position:absolute;
+			left:8px;
+			top:8px;
+			color:#FFFFFF;
+			opacity:.6;
+		}
+
+		#canvas
+		{
+			position:absolute;
+			left:0px;
+			top:0px;
+		}
+		</style>
+	</head>
+	<body>
+		<canvas id="canvas"></canvas>
+		<div id="info"></div>
+
+		<script id="vert" type="x-shader/x-vertex">
+			attribute vec3 att_pos;
+			attribute vec3 att_nor;
+			attribute vec3 att_col;
+			varying vec3 var_pos;
+			varying vec3 var_nor;
+			varying vec3 var_col;
+			varying mat4 var_mat;
+			uniform mat4 uni_matM;
+			uniform mat4 uni_matV;
+			uniform mat4 uni_matP;
+
+			void main()
+			{
+				var_pos=att_pos;
+				var_nor=att_nor;
+				var_col=att_col;
+				var_mat=uni_matM;
+				gl_Position=uni_matP*uni_matV*uni_matM*vec4(att_pos,1.0);
+			}
+		</script>
+
+		<script id="frag" type="x-shader/x-fragment">
+			precision mediump float;
+
+			varying vec3 var_pos;
+			varying vec3 var_nor;
+			varying vec3 var_col;
+			varying mat4 var_mat;
+			uniform float uni_t;
+			uniform int uni_p;
+			uniform vec2 uni_s;
+			uniform vec2 uni_m;
+			uniform vec3 uni_eye;
+
+			float rnd(float _s)
+			{
+				return mod(sin(_s*2473.48+982.72)*128.11,1.);
+			}
+
+			float cl(float i){return clamp(i,0.,1.);}
+
+			void main()
+			{
+				vec3 nor=normalize((var_mat*vec4(var_nor,0.)).xyz);
+				vec3 eye=normalize((vec4(uni_eye,0.)-var_mat*vec4(var_pos,0.)).xyz);
+				vec3 lig=normalize(vec3(0.,1.,1.));
+				float dif1=cl(dot(nor,normalize(lig)));
+				float spe1=pow(cl(dot(nor,normalize(lig+eye)))*1.,20.);
+				lig=normalize(vec3(0.,-1.,1.));
+				float dif2=cl(dot(nor,normalize(lig)));
+				float spe2=pow(cl(dot(nor,normalize(lig+eye)))*1.,20.);
+
+				vec3 col;
+				vec3 b;
+				if(uni_p==0)
+				{
+					gl_FragColor=vec4((nor.y+1.)*vec3(.1),.9);
+					return;
+				}
+				else if(uni_p==1)
+				{
+					gl_FragColor=vec4(1.,1.,1.,.1);
+					return;
+				}
+				else if(uni_p==2)
+				{
+					b=vec3(1.,.1,.0)*3.;
+				}
+				else if(uni_p==3)
+				{
+					b=vec3(.08);
+				}
+				else
+				{
+					if(var_col.z<.5)
+					{
+						gl_FragColor=vec4(vec3(dif1+dif2)*.1,.5);return;
+					}
+					else
+					{
+						if(uni_p==10){b=vec3(0.,1.,.5);}
+						if(uni_p==11){b=vec3(1.,0.,.5);}
+						if(uni_p==12){b=vec3(0.,.5,1.);}
+					}
+				}
+
+				col+=b*vec3(.9,.8,.7)*dif1;
+				col+=vec3(.03)*spe1;
+				col+=b*vec3(.7,.8,.9)*dif2;
+				col+=vec3(.03)*spe2;
+
+				gl_FragColor=vec4(col,1.);
+			}
+		</script>
+
+		<script src="catMatrix.js"></script>
+
+		<script src="catGL.js"></script>
+
+		<script>
+			var cvs=document.getElementById('canvas');
+			cvs.width=window.innerWidth;
+			cvs.height=window.innerHeight;
+
+			var gl=cvs.getContext('experimental-webgl');
+
+			gl.enable(gl.DEPTH_TEST);
+			gl.enable(gl.CULL_FACE);
+			gl.enable(gl.BLEND);
+			gl.blendFuncSeparate(gl.SRC_ALPHA,gl.ONE_MINUS_SRC_ALPHA,gl.ONE,gl.ONE);
+
+			var prg=program("vert","frag");
+
+			function r(_i)
+			{
+				var i=Math.sin(_i*831.293+3871.33)+3981.34;
+				return i-Math.floor(i);
+			}
+
+			function isHot(i)
+			{
+				switch(i)
+				{
+					case 0:return [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0];
+					case 33:return [0,0,0,0,0,1,0,0,0,0,0,1,0,0,0,0];
+					case 34:return [0,0,0,0,0,0,0,1,0,0,0,1,0,0,0,0];
+					case 35:return [0,0,0,0,1,1,1,1,1,1,0,1,0,0,1,0];
+					case 36:return [1,1,0,1,1,1,0,1,1,1,0,1,0,0,1,0];
+					case 37:return [1,0,0,1,1,0,0,1,1,1,0,1,1,0,1,1];
+					case 38:return [0,1,0,1,1,1,0,0,0,0,0,1,1,0,1,1];
+					case 39:return [0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0];
+					case 40:return [0,0,0,0,0,0,0,0,0,0,0,0,1,1,0,0];
+					case 41:return [0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,1];
+					case 42:return [0,0,0,0,0,0,0,0,1,1,1,0,1,1,0,1];
+					case 43:return [0,0,0,0,0,0,0,0,1,1,0,1,0,0,1,0];
+					case 44:return [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1];
+					case 45:return [0,0,0,0,0,0,0,0,1,1,0,0,0,0,0,0];
+					case 46:return [0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0];
+					case 47:return [0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,1];
+					case 48:return [1,1,1,1,1,1,1,1,0,0,0,0,1,0,0,1];
+					case 49:return [0,0,1,1,0,0,0,0,0,0,0,0,0,0,0,0];
+					case 50:return [1,1,1,0,1,1,1,0,1,1,0,0,0,0,0,0];
+					case 51:return [1,1,1,1,1,1,0,0,1,1,0,0,0,0,0,0];
+					case 52:return [0,0,1,1,0,0,0,1,1,1,0,0,0,0,0,0];
+					case 53:return [1,1,0,1,1,1,0,1,1,1,0,0,0,0,0,0];
+					case 54:return [1,1,0,1,1,1,1,1,1,1,0,0,0,0,0,0];
+					case 55:return [1,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0];
+					case 56:return [1,1,1,1,1,1,1,1,1,1,0,0,0,0,0,0];
+					case 57:return [1,1,1,1,1,1,0,1,1,1,0,0,0,0,0,0];
+					case 58:return [0,0,0,0,0,0,0,0,0,0,0,1,0,0,1,0];
+					case 59:return [0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,1];
+					case 60:return [0,0,0,0,0,0,0,0,0,0,0,0,1,1,0,0];
+					case 61:return [0,0,0,0,1,1,0,0,1,1,0,0,0,0,0,0];
+					case 62:return [0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,1];
+					case 63:return [1,1,1,0,0,0,0,0,0,1,0,0,0,0,1,0];
+					case 64:return [1,1,1,0,1,1,1,1,0,1,0,0,1,0,0,0];
+					case 65:return [1,1,1,1,0,0,1,1,1,1,0,0,0,0,0,0];
+					case 66:return [1,1,1,1,1,1,0,0,0,1,0,1,0,0,1,0];
+					case 67:return [1,1,0,0,1,1,1,1,0,0,0,0,0,0,0,0];
+					case 68:return [1,1,1,1,1,1,0,0,0,0,0,1,0,0,1,0];
+					case 69:return [1,1,0,0,1,1,1,1,1,1,0,0,0,0,0,0];
+					case 70:return [1,1,0,0,0,0,1,1,1,1,0,0,0,0,0,0];
+					case 71:return [1,1,0,1,1,1,1,1,0,1,0,0,0,0,0,0];
+					case 72:return [0,0,1,1,0,0,1,1,1,1,0,0,0,0,0,0];
+					case 73:return [1,1,0,0,1,1,0,0,0,0,0,1,0,0,1,0];
+					case 74:return [0,0,1,1,1,1,1,0,0,0,0,0,0,0,0,0];
+					case 75:return [0,0,0,0,0,0,1,1,1,0,0,0,1,1,0,0];
+					case 76:return [0,0,0,0,1,1,1,1,0,0,0,0,0,0,0,0];
+					case 77:return [0,0,1,1,0,0,1,1,0,0,1,0,1,0,0,0];
+					case 78:return [0,0,1,1,0,0,1,1,0,0,1,0,0,1,0,0];
+					case 79:return [1,1,1,1,1,1,1,1,0,0,0,0,0,0,0,0];
+					case 80:return [1,1,1,0,0,0,1,1,1,1,0,0,0,0,0,0];
+					case 81:return [1,1,1,1,1,1,1,1,0,0,0,0,0,1,0,0];
+					case 82:return [1,1,1,0,0,0,1,1,1,1,0,0,0,1,0,0];
+					case 83:return [1,1,0,1,1,1,0,1,1,1,0,0,0,0,0,0];
+					case 84:return [1,1,0,0,0,0,0,0,0,0,0,1,0,0,1,0];
+					case 85:return [0,0,1,1,1,1,1,1,0,0,0,0,0,0,0,0];
+					case 86:return [0,0,0,0,0,0,1,1,0,0,0,0,1,0,0,1];
+					case 87:return [0,0,1,1,0,0,1,1,0,0,0,0,0,1,0,1];
+					case 88:return [0,0,0,0,0,0,0,0,0,0,1,0,1,1,0,1];
+					case 89:return [0,0,0,0,0,0,0,0,0,0,1,0,1,0,1,0];
+					case 90:return [1,1,0,0,1,1,0,0,0,0,0,0,1,0,0,1];
+					case 91:return [0,1,0,0,1,0,0,0,0,0,0,1,0,0,1,0];
+					case 92:return [0,0,0,0,0,0,0,0,0,0,1,0,0,1,0,0];
+					case 93:return [1,0,0,0,0,1,0,0,0,0,0,1,0,0,1,0];
+					case 94:return [0,0,0,0,0,0,0,1,0,0,1,0,0,0,0,0];
+					case 95:return [0,0,0,0,1,1,0,0,0,0,0,0,0,0,0,0];
+					case 96:return [0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0];
+				}
+			}
+
+			var pos=[];
+			var nor=[];
+			var col=[];
+			var index=[];
+			var ibo=[];
+
+			var cha=[];
+			var ani=[];
+
+			function vertex()
+			{
+				pos=[];nor=[];col=[];index=[];ibo=[];
+				var d=new Date();
+				var tempCha=[];
+				for(var c=0;c<21;c++)
+				{
+					tempCha[c]=cha[c];
+				}
+				cha[0]=Math.floor(d.getHours()/10);
+				cha[1]=d.getHours()%10;
+				cha[2]=Math.floor(d.getMinutes()/10);
+				cha[3]=d.getMinutes()%10;
+				cha[4]=Math.floor(d.getSeconds()/10);
+				cha[5]=d.getSeconds()%10;
+				cha[6]=Math.floor(d.getFullYear()/1000);
+				cha[7]=Math.floor(d.getFullYear()/100)%10;
+				cha[8]=Math.floor(d.getFullYear()/10)%10;
+				cha[9]=d.getFullYear()%10;
+				cha[10]=d.getMonth();
+				cha[11]=d.getMonth();
+				cha[12]=d.getMonth();
+				cha[13]=Math.floor(d.getDate()/10);
+				cha[14]=d.getDate()%10;
+				cha[15]=d.getDay();
+				cha[16]=d.getDay();
+				cha[17]=d.getDay();
+				for(var c=0;c<21;c++)
+				{
+					if(tempCha[c]!=cha[c])
+					{
+						ani[c]=0;
+						if(c==3){spinD++;}
+					}
+				}
+				if(tempCha[13]!=cha[13]){ani[14]=0;}
+
+				sphere(32,32,-16,0);ibo[0]=create_ibo(index);index=[];
+
+				p16s(48+cha[0],.7,0);ibo[1]=create_ibo(index);index=[];
+				p16s(48+cha[1],.7,1);ibo[2]=create_ibo(index);index=[];
+				p16s(48+cha[2],.7,2);ibo[3]=create_ibo(index);index=[];
+				p16s(48+cha[3],.7,3);ibo[4]=create_ibo(index);index=[];
+
+				p16s(48+cha[4],.2,4);ibo[5]=create_ibo(index);index=[];
+				p16s(48+cha[5],.2,5);ibo[6]=create_ibo(index);index=[];
+
+				p16s(48+cha[6],.22,6);ibo[7]=create_ibo(index);index=[];
+				p16s(48+cha[7],.22,7);ibo[8]=create_ibo(index);index=[];
+				p16s(48+cha[8],.22,8);ibo[9]=create_ibo(index);index=[];
+				p16s(48+cha[9],.22,9);ibo[10]=create_ibo(index);index=[];
+				
+				p16s(month(cha[10])[0],.3,10);ibo[11]=create_ibo(index);index=[];
+				p16s(month(cha[10])[1],.3,11);ibo[12]=create_ibo(index);index=[];
+				p16s(month(cha[10])[2],.3,12);ibo[13]=create_ibo(index);index=[];
+				
+				p16s(48+cha[13],.56,13);ibo[14]=create_ibo(index);index=[];
+				p16s(48+cha[14],.56,14);ibo[15]=create_ibo(index);index=[];
+				
+				p16s(day(cha[15])[0],.17,15);ibo[16]=create_ibo(index);index=[];
+				p16s(day(cha[15])[1],.17,16);ibo[17]=create_ibo(index);index=[];
+				p16s(day(cha[15])[2],.17,17);ibo[18]=create_ibo(index);index=[];
+
+				sphere(3,3,4,0);ibo[19]=create_ibo(index);index=[];
+				
+				p16s(70,.48,3);ibo[20]=create_ibo(index);index=[];
+				p16s(77,.48,3);ibo[21]=create_ibo(index);index=[];
+				p16s(83,.48,3);ibo[22]=create_ibo(index);index=[];
+
+				function p16s(_i,_g,_n)
+				{
+					var s=[1*_g,2*_g,.3*_g];
+
+					var a=isHot(_i);
+					for(var c=0;c<21-ani[_n]/2;c++)
+					{
+						a[c]=1-a[c];
+					}
+					poly16seg(a,s,.1,1);
+					for(var c=0;c<21;c++)
+					{
+						a[c]=1-a[c];
+					}
+					poly16seg(a,s,.1,0);
+				}
+
+				function month(_i)
+				{
+					switch(_i)
+					{
+						case 0:return [74,65,78];
+						case 1:return [70,69,66];
+						case 2:return [77,65,82];
+						case 3:return [65,80,82];
+						case 4:return [77,65,89];
+						case 5:return [74,85,78];
+						case 6:return [74,85,76];
+						case 7:return [65,85,71];
+						case 8:return [83,69,80];
+						case 9:return [79,67,84];
+						case 10:return [78,79,86];
+						case 11:return [68,69,67];
+					}
+				}
+
+				function day(_i)
+				{
+					switch(_i)
+					{
+						case 0:return [83,85,78];
+						case 1:return [77,79,78];
+						case 2:return [84,85,69];
+						case 3:return [87,69,68];
+						case 4:return [84,72,85];
+						case 5:return [70,82,73];
+						case 6:return [83,65,84];
+					}
+				}
+
+				setAtt('att_pos',pos,3);
+				setAtt('att_nor',nor,3);
+				setAtt('att_col',col,3);
+
+				for(var c=0;c<18;c++)
+				{
+					ani[c]++;
+					if(3<c&&c<6)ani[c]+=3;
+				}
+			}
+
+			var t=0,
+			frameTime=[],
+			spin=0,
+			spinD=0;
+
+			function disp()
+			{
+				vertex();
+
+				{
+					gl.clearColor(0.,0.,0.,1.);
+					gl.clearDepth(1.0);
+					gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
+
+					var camPos=[0,0,13];
+					var matM;
+					var matV=M.lookAt(camPos,[0,0,0],[0,1,0]);
+					var matP=M.perspective(70,cvs.width/cvs.height,.1,100);
+
+					gl.uniform1f(gl.getUniformLocation(prg,'uni_t'),t);
+					gl.uniform2fv(gl.getUniformLocation(prg,'uni_s'),[cvs.width,cvs.height]);
+					gl.uniform3fv(gl.getUniformLocation(prg,'uni_eye'),camPos);
+					gl.uniformMatrix4fv(gl.getUniformLocation(prg,'uni_matV'),false,matV);
+					gl.uniformMatrix4fv(gl.getUniformLocation(prg,'uni_matP'),false,matP);
+
+					gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER,ibo[0]);
+					matM=M.rotate(M.vector(M.rotate([4,1,6],t*.0011),[1,3,2]),t*.0014+spin);
+					gl.uniformMatrix4fv(gl.getUniformLocation(prg,'uni_matM'),false,matM);
+					gl.uniform1i(gl.getUniformLocation(prg,'uni_p'),0);
+					gl.drawElements(gl.TRIANGLES,ibo[0].length,gl.UNSIGNED_SHORT,0);
+					gl.uniform1i(gl.getUniformLocation(prg,'uni_p'),1);
+					gl.drawElements(gl.LINE_STRIP,ibo[0].length,gl.UNSIGNED_SHORT,0);
+
+					var matTime=M.multiply(M.translate([1.5,0,7]),M.rotate([0,1,0],-.1));
+					var matDate=M.multiply(M.translate([-2.5,-1.3,7]),M.rotate([0,1,0],.1));
+					var matFMS=M.multiply(M.translate([-3.2,1.06,7]),M.rotate([0,1,0],.1));
+					function matAni(_c,_d)
+					{
+						var m=M.identity();
+						m=M.multiply(M.rotate([.1,1,0],Math.pow(.9,ani[_c])*Math.PI*2),m); // 文字スピン
+						m=M.multiply(M.rotate(M.vector(M.rotate([.4,0,.6],t*.01+_d*.1),[.2,1,0]),.0),m); // 文字揺らし
+						return m;
+					}
+
+					for(var c=0;c<4;c++)
+					{
+						gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER,ibo[c+1]);
+						matM=matAni(c,c);
+						matM=M.multiply(M.translate([(c%2-.5)*1.6,(.5-Math.floor(c/2))*3,0]),matM); // 文字を配置
+						matM=M.multiply(matTime,matM); // 全体を配置
+						gl.uniformMatrix4fv(gl.getUniformLocation(prg,'uni_matM'),false,matM);
+						gl.uniform1i(gl.getUniformLocation(prg,'uni_p'),10);
+						gl.drawElements(gl.TRIANGLES,ibo[c+1].length,gl.UNSIGNED_SHORT,0);
+					}
+
+					for(var c=0;c<2;c++)
+					{
+						gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER,ibo[c+5]);
+						matM=matAni(c+4,c+4);
+						matM=M.multiply(M.translate([c*.5+1.8,-2.5,0]),matM); // 文字を配置
+						matM=M.multiply(matTime,matM); // 全体を配置
+						gl.uniformMatrix4fv(gl.getUniformLocation(prg,'uni_matM'),false,matM);
+						gl.uniform1i(gl.getUniformLocation(prg,'uni_p'),10);
+						gl.drawElements(gl.TRIANGLES,ibo[c+5].length,gl.UNSIGNED_SHORT,0);
+					}
+
+					for(var c=0;c<4;c++)
+					{
+						gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER,ibo[c+7]);
+						matM=matAni(c+6,c+6);
+						matM=M.multiply(M.translate([c*.515-2,.7,0]),matM); // 文字を配置
+						matM=M.multiply(matDate,matM); // 全体を配置
+						gl.uniformMatrix4fv(gl.getUniformLocation(prg,'uni_matM'),false,matM);
+						gl.uniform1i(gl.getUniformLocation(prg,'uni_p'),11);
+						gl.drawElements(gl.TRIANGLES,ibo[c+7].length,gl.UNSIGNED_SHORT,0);
+					}
+
+					for(var c=0;c<3;c++)
+					{
+						gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER,ibo[c+11]);
+						matM=matAni(c+10,c+10);
+						matM=M.multiply(M.translate([c*.68-2,-.5,0]),matM); // 文字を配置
+						matM=M.multiply(matDate,matM); // 全体を配置
+						gl.uniformMatrix4fv(gl.getUniformLocation(prg,'uni_matM'),false,matM);
+						gl.uniform1i(gl.getUniformLocation(prg,'uni_p'),11);
+						gl.drawElements(gl.TRIANGLES,ibo[c+11].length,gl.UNSIGNED_SHORT,0);
+					}
+
+					for(var c=0;c<2;c++)
+					{
+						gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER,ibo[c+14]);
+						matM=matAni(c+13,c+13);
+						matM=M.multiply(M.translate([c*1.25+.4,.05,0]),matM); // 文字を配置
+						matM=M.multiply(matDate,matM); // 全体を配置
+						gl.uniformMatrix4fv(gl.getUniformLocation(prg,'uni_matM'),false,matM);
+						gl.uniform1i(gl.getUniformLocation(prg,'uni_p'),11);
+						gl.drawElements(gl.TRIANGLES,ibo[c+14].length,gl.UNSIGNED_SHORT,0);
+					}
+
+					for(var c=0;c<3;c++)
+					{
+						gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER,ibo[c+16]);
+						matM=matAni(c+15,c+15);
+						matM=M.multiply(M.translate([c*.4+1.1,-1.6,0]),matM); // 文字を配置
+						matM=M.multiply(matDate,matM); // 全体を配置
+						gl.uniformMatrix4fv(gl.getUniformLocation(prg,'uni_matM'),false,matM);
+						gl.uniform1i(gl.getUniformLocation(prg,'uni_p'),11);
+						gl.drawElements(gl.TRIANGLES,ibo[c+16].length,gl.UNSIGNED_SHORT,0);
+					}
+
+					for(var c=0;c<20;c++)
+					{
+						gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER,ibo[19]);
+						matM=M.rotate([r(c+126)-.5,r(c+127)-.5,r(c+128)-.5],t*.004*(r(c+54)+1)+r(c+55)*999+spin*3); // 自転
+						matM=M.multiply(M.translate([0,0,0]),matM);
+						gl.uniformMatrix4fv(gl.getUniformLocation(prg,'uni_matM'),false,matM);
+						gl.uniform1i(gl.getUniformLocation(prg,'uni_p'),2);
+						gl.drawElements(gl.LINE_STRIP,ibo[19].length,gl.UNSIGNED_SHORT,0);
+						gl.uniform1i(gl.getUniformLocation(prg,'uni_p'),3);
+						gl.drawElements(gl.TRIANGLES,ibo[19].length,gl.UNSIGNED_SHORT,0);
+					}
+
+					for(var c=0;c<3;c++)
+					{
+						gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER,ibo[c+20]);
+						matM=matAni(3,c+18);
+						matM=M.multiply(M.translate([c*1.2,0,0]),matM); // 文字を配置
+						matM=M.multiply(matFMS,matM); // 全体を配置
+						gl.uniformMatrix4fv(gl.getUniformLocation(prg,'uni_matM'),false,matM);
+						gl.uniform1i(gl.getUniformLocation(prg,'uni_p'),12);
+						gl.drawElements(gl.TRIANGLES,ibo[c+20].length,gl.UNSIGNED_SHORT,0);
+					}
+				}
+
+				gl.flush();
+
+				t++;
+				spin+=(spinD-spin)*.15;
+				info();
+				setTimeout("disp()",1000/60);
+			}
+			disp();
+
+			function calcFps()
+			{
+				frameTime[t]=(+new Date());
+				if(t-60<0)return (".....").substring(0,(t/3)%5+1);
+				return Math.floor(1000*60/(frameTime[t]-frameTime[t-60])*100)/100;
+			}
+
+			function info()
+			{
+				document.getElementById("info").innerHTML="<span style=\"font-size:24px\">16 Segment Clock</span><br>Resolution : "+window.innerWidth+" x "+window.innerHeight+"<br>Frame : "+t+"<br>FPS : "+calcFps()+""
+			}
+
+			function poly(_i,_c)
+			{
+				l=pos.length/3;
+				i=_i.length;
+				for(var c=6;c<i;c+=3)
+				{
+					for(var c2=0;c2<3;c2++)
+					{
+						pos.push(_i[c2]);
+					}
+					for(var c2=c-3;c2<c+3;c2++)
+					{
+						pos.push(_i[c2]);
+					}
+
+					{
+						var v=M.cross([_i[c-3]-_i[0],_i[c-2]-_i[1],_i[c-1]-_i[2]],[_i[c]-_i[c-3],_i[c+1]-_i[c-2],_i[c+2]-_i[c-1]]);
+						for(var c2=0;c2<3;c2++)
+						{
+							nor.push(v[0]);nor.push(v[1]);nor.push(v[2]);
+						}
+					}
+
+					for(var c2=0;c2<3;c2++)
+					{
+						index.push(l+c-6+c2);
+						switch(c2)
+						{
+							case 0:col.push(1,1);break;
+							case 1:col.push(0,c==6?1:0);break;
+							case 2:col.push(c==6?0:1,0);break;
+						}
+						col.push(_c);
+					}
+				}
+			}
+
+			function polyExt(_i,_e,_c)
+			{
+				var a=[_i[0],_i[1],_e],l=_i.length;
+				for(var c=2;c<l;c+=2)
+				{
+					a.push(_i[c],_i[c+1],_e);
+				}
+				poly(a,_c);
+
+				a=[_i[0],_i[1],-_e];
+				for(var c=l-2;2<=c;c-=2)
+				{
+					a.push(_i[c],_i[c+1],-_e);
+				}
+				poly(a,_c);
+
+				for(var c=0;c<l;c+=2)
+				{
+					poly([_i[c],_i[c+1],-_e,_i[(c+2)%l],_i[(c+2)%l+1],-_e,_i[(c+2)%l],_i[(c+2)%l+1],_e,_i[c],_i[c+1],_e],_c);
+				}
+			}
+
+			function polyCube(_v,_c)
+			{
+				var w=_v[0]/2,h=_v[1]/2,d=_v[2]/2;
+				poly([w,h,d,-w,h,d,-w,-h,d,w,-h,d],_c);
+				poly([-w,h,-d,w,h,-d,w,-h,-d,-w,-h,-d],_c);
+				poly([w,h,-d,w,h,d,w,-h,d,w,-h,-d],_c);
+				poly([-w,h,d,-w,h,-d,-w,-h,-d,-w,-h,d],_c);
+				poly([w,h,-d,-w,h,-d,-w,h,d,w,h,d],_c);
+				poly([w,-h,d,-w,-h,d,-w,-h,-d,w,-h,-d],_c);
+			}
+
+			function poly12hedron(_l,_c)
+			{
+				var r=1/Math.cos(3*Math.PI/10)*.5*_l;
+				for(var c=0;c<12;c++)
+				{
+					var p=[];
+					for(var cc=0;cc<5;cc++)
+					{
+						var v=[0,r,0];
+						v=M.vector(M.translate([0,0,r*((1+Math.sqrt(5))/2+1)/2],cc*Math.PI*2/5),v);
+						v=M.vector(M.rotate([0,0,1],cc*Math.PI*2/5),v);
+						if(0<c%6)
+						{
+							v=M.vector(M.rotate([0,0,1],Math.PI),v);
+							v=M.vector(M.rotate([1,0,0],Math.acos(1/Math.sqrt(5))),v);
+							v=M.vector(M.rotate([0,0,1],c*Math.PI*2/5),v);
+						}
+						if(5<c)
+						{
+							v=M.vector(M.rotate([0,0,1],Math.PI),v);
+							v=M.vector(M.rotate([0,1,0],Math.PI),v);
+						}
+						p.push(v[0],v[1],v[2]);
+					}
+					poly(p,_c);
+				}
+			}
+
+			function poly16seg(_p,_v,_s,_c)
+			{
+				if(_p[0]==1){d([-.97,.98,-.69,.85,-.01,.85,-.01,1,-.9,1]);}
+				if(_p[1]==1){d([.97,.98,.9,1,.01,1,.01,.85,.69,.85]);}
+				if(_p[2]==1){d([.98,.97,.7,.84,.7,.085,.9,.01,1,.05,1,.95]);}
+				if(_p[3]==1){d([.98,-.97,1,-.95,1,-.05,.9,-.01,.7,-.085,.7,-.84]);}
+				if(_p[4]==1){d([.97,-.98,.69,-.85,.01,-.85,.01,-1,.9,-1]);}
+				if(_p[5]==1){d([-.97,-.98,-.9,-1,-.01,-1,-.01,-.85,-.69,-.85]);}
+				if(_p[6]==1){d([-.98,-.97,-.7,-.84,-.7,-.085,-.9,-.01,-1,-.05,-1,-.95]);}
+				if(_p[7]==1){d([-.98,.97,-1,.95,-1,.05,-.9,.01,-.7,.085,-.7,.84]);}
+				if(_p[8]==1){d([-.89,0,-.69,-.075,-.01,-.075,-.01,.075,-.69,.075]);}
+				if(_p[9]==1){d([.89,0,.69,.075,.01,.075,.01,-.075,.69,-.075]);}
+				if(_p[10]==1){d([-.68,.84,-.68,.55,-.2,.085,-.12,.085,-.17,.35]);}
+				if(_p[11]==1){d([.15,.84,-.15,.84,-.15,.35,-.1,.085,.1,.085,.15,.35]);}
+				if(_p[12]==1){d([.68,.84,.17,.35,.12,.085,.2,.085,.68,.55]);}
+				if(_p[13]==1){d([.68,-.84,.68,-.55,.2,-.085,.12,-.085,.17,-.35]);}
+				if(_p[14]==1){d([.15,-.84,.15,-.35,.1,-.085,-.1,-.085,-.15,-.35,-.15,-.84]);}
+				if(_p[15]==1){d([-.68,-.84,-.17,-.35,-.12,-.085,-.2,-.085,-.68,-.55]);}
+
+				function d(i)
+				{
+					var a=[];
+					for(var c=0;c<i.length;c+=2)
+					{
+						a.push(i[c]*_v[0]+i[c+1]*_v[1]*_s,i[c+1]*_v[1]);
+					}
+					polyExt(a,_v[2],_c);
+				}
+			}
+
+			function sphere(_x,_y,_r,_c)
+			{
+				var l=pos.length/3,
+				x=Math.floor(_x),
+				y=Math.floor(_y);
+				pos.push(0,_r,0);
+				nor.push(0,_r,0);
+				col.push(_c,_c,_c);
+				for(var cy=1;cy<y-1;cy++)
+				{
+					for(var cx=0;cx<x;cx++)
+					{
+						var v=[0,_r,0];
+						v=M.vector(M.rotate([0,0,1],cy/(y-1)*Math.PI),v);
+						v=M.vector(M.rotate([0,1,0],cx/(x)*Math.PI*2),v);
+						pos.push(v[0],v[1],v[2]);
+						nor.push(v[0],v[1],v[2]);
+						col.push(_c,_c,_c);
+					}
+				}
+				pos.push(0,-_r,0);
+				nor.push(0,-_r,0);
+				col.push(_c,_c,_c);
+
+				for(var c=0;c<x;c++)
+				{
+					index.push(l,l+1+c%x,l+1+(c+1)%x);
+				}
+				for(var cy=0;cy<y-3;cy++)
+				{
+					for(var cx=0;cx<x;cx++)
+					{
+						index.push(l+1+x*cy+(cx)%x,l+1+x*(cy+1)+(cx+1)%x,l+1+x*cy+(cx+1)%x);
+						index.push(l+1+x*cy+(cx)%x,l+1+x*(cy+1)+(cx)%x,l+1+x*(cy+1)+(cx+1)%x);
+					}
+				}
+				for(var c=0;c<x;c++)
+				{
+					index.push(l+x*(y-2)+1,l+x*(y-3)+1+(c+1)%x,l+x*(y-3)+1+(c)%x);
+				}
+			}
+
+			function torus(_x,_y,_o,_i,_c)
+			{
+				var l=pos.length/3,
+				x=Math.floor(_x),
+				y=Math.floor(_y);
+				for(var c=0;c<y;c++)
+				{
+					var vo=[0,_o,0];
+					var mo=M.rotate([0,0,1],Math.PI*2/y*c);
+					for(var cx=0;cx<x;cx++)
+					{
+						var v=[0,_i,0];
+						v=M.vector(M.rotate([1,0,0],Math.PI*2/x*cx),v);
+						var vp=M.vector(mo,M.add(v,vo));
+						var vn=M.vector(mo,v);
+						pos.push(vp[0],vp[1],vp[2]);
+						nor.push(vn[0],vn[1],vn[2]);
+						col.push(_c,_c,_c);
+					}
+				}
+
+				for(var c=0;c<y;c++)
+				{
+					for(var cx=0;cx<x;cx++)
+					{
+						index.push(l+cx+c*x,l+(cx+1)%x+(c+1)%y*x,l+(cx+1)%x+c*x);
+						index.push(l+cx+c*x,l+cx+(c+1)%y*x,l+(cx+1)%x+(c+1)%y*x);
+					}
+				}
+			}
+
+			function resize()
+			{
+				var w=window.innerWidth;
+				var h=window.innerHeight;
+				cvs.width=w;
+				cvs.height=h;
+				gl.viewport(0,0,w,h);
+			}
+			resize();
+			window.onresize=resize;
+		</script>
+	</body>
+</html>
