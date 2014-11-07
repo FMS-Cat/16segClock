@@ -5,6 +5,11 @@
 		<meta charset="UTF-8">
 		<link href='http://fonts.googleapis.com/css?family=Roboto:500' rel='stylesheet' type='text/css'>
 		<style type="text/css">
+		a
+		{
+			color:#CCCCCC;
+		}
+
 		#info
 		{
 			font-family:'Roboto',sans-serif;
@@ -60,9 +65,11 @@
 			varying mat4 var_mat;
 			uniform float uni_t;
 			uniform int uni_p;
+			uniform int uni_col;
 			uniform vec2 uni_s;
 			uniform vec2 uni_m;
 			uniform vec3 uni_eye;
+			uniform int uni_ball;
 
 			float rnd(float _s)
 			{
@@ -84,41 +91,208 @@
 
 				vec3 col;
 				vec3 b;
-				if(uni_p==0)
+				if(uni_col==0)
 				{
-					gl_FragColor=vec4((nor.y+1.)*vec3(.1),.9);
-					return;
-				}
-				else if(uni_p==1)
-				{
-					gl_FragColor=vec4(1.,1.,1.,.1);
-					return;
-				}
-				else if(uni_p==2)
-				{
-					b=vec3(1.,.1,.0)*3.;
-				}
-				else if(uni_p==3)
-				{
-					b=vec3(.08);
-				}
-				else
-				{
-					if(var_col.z<.5)
+					if(uni_p==0)
 					{
-						gl_FragColor=vec4(vec3(dif1+dif2)*.1,.5);return;
+						gl_FragColor=vec4((nor.y+1.)*vec3(.1),.9);
+						return;
+					}
+					else if(uni_p==1)
+					{
+						gl_FragColor=vec4(1.,1.,1.,.1);
+						return;
+					}
+					else if(uni_p==2)
+					{
+						b=vec3(1.,.1,.0)*3.;
+					}
+					else if(uni_p==3)
+					{
+						b=vec3(.08);
 					}
 					else
 					{
-						if(uni_p==10){b=vec3(0.,1.,.5);}
-						if(uni_p==11){b=vec3(1.,0.,.5);}
-						if(uni_p==12){b=vec3(0.,.5,1.);}
+						if(var_col.z<.5)
+						{
+							gl_FragColor=vec4(vec3(dif1+dif2)*.1,.5);return;
+						}
+						else
+						{
+							if(uni_p==10){b=vec3(0.,1.,.5);}
+							if(uni_p==11){b=vec3(1.,0.,.5);}
+							if(uni_p==12){b=vec3(0.,.5,1.);}
+						}
+					}
+				}
+				else if(1<=uni_col&&uni_col<=14)
+				{
+					if(uni_p==0)
+					{
+						gl_FragColor=vec4((nor.y+1.)*vec3(.1),.9);
+						if(7<uni_col){gl_FragColor=vec4(1.-(nor.y+1.)*vec3(.1),.9);}
+						return;
+					}
+					else if(uni_p==1)
+					{
+						gl_FragColor=vec4(1.,1.,1.,.1);
+						if(7<uni_col){gl_FragColor=vec4(0.,0.,0.,.1);}
+						return;
+					}
+					else if(uni_p==2)
+					{
+						if(uni_col==1||uni_col==8)b=vec3(1.,.0,.2)*3.;
+						if(uni_col==2||uni_col==9)b=vec3(1.,.1,.0)*3.;
+						if(uni_col==3||uni_col==10)b=vec3(.2,1.,.0)*3.;
+						if(uni_col==4||uni_col==11)b=vec3(.0,1.,.2)*3.;
+						if(uni_col==5||uni_col==12)b=vec3(.0,.2,1.)*4.;
+						if(uni_col==6||uni_col==13)b=vec3(.2,.0,1.)*3.;
+						if(uni_col==7)b=vec3(1.,1.,1.)*3.;
+						if(uni_col==14)b=vec3(0.,0.,0.)*3.;
+					}
+					else if(uni_p==3)
+					{
+						b=vec3(.08);
+						if(7<uni_col){b=vec3(1.2);}
+					}
+					else
+					{
+						if(var_col.z<.5)
+						{
+							gl_FragColor=vec4(vec3(dif1+dif2)*.1,.5);
+							if(7<uni_col){gl_FragColor=vec4(.9+vec3(dif1+dif2)*.1,.2);}
+							return;
+						}
+						else
+						{
+							if(uni_col==1||uni_col==8)b=vec3(1.,.0,.5);
+							if(uni_col==2||uni_col==9)b=vec3(1.,.2,.0);
+							if(uni_col==3||uni_col==10)b=vec3(.5,1.,.0);
+							if(uni_col==4||uni_col==11)b=vec3(.0,1.,.5);
+							if(uni_col==5||uni_col==12)b=vec3(.0,.5,1.);
+							if(uni_col==6||uni_col==13)b=vec3(.3,.0,1.);
+							if(uni_col==7)b=vec3(1.);
+							if(uni_col==14)b=vec3(.1);
+						}
+					}
+				}
+				else if(15<=uni_col&&uni_col<=18)
+				{
+					vec4 cv;
+					if(uni_col==15)cv=vec4(1.,1.,1.,1.);
+					if(uni_col==16)cv=vec4(1.,0.,0.,1.);
+					if(uni_col==17)cv=vec4(0.,1.,0.,1.);
+					if(uni_col==18)cv=vec4(0.,0.,1.,1.);
+					if(uni_p==0)
+					{
+						float s=0.;
+						if(mod(gl_FragCoord.x+gl_FragCoord.y+uni_t,24.)<12.){s=.3;}
+						if(mod(gl_FragCoord.x-gl_FragCoord.y,24.)<12.){s=.3-s;}
+						gl_FragColor=vec4(s)*cv;
+						return;
+					}
+					else if(uni_p==1)
+					{
+						discard;
+					}
+					else if(uni_p==2)
+					{
+						gl_FragColor=vec4(1.,1.,1.,1.)*cv;
+						return;
+					}
+					else if(uni_p==3)
+					{
+						gl_FragColor=vec4(0.,0.,0.,1.)*cv;
+						return;
+					}
+					else
+					{
+						if(var_col.z<.5)
+						{
+							float s=0.;
+							if(mod(gl_FragCoord.x,3.)<1.&&mod(gl_FragCoord.y,3.)<1.)s=1.;
+							gl_FragColor=vec4(s)*cv;
+							return;
+						}
+						else
+						{
+							float s=1.;
+							gl_FragColor=vec4(s)*cv;
+							return;
+						}
+					}
+				}
+				else if(19==uni_col)
+				{
+					vec4 cv;
+					if(uni_col==19)cv=vec4(1.,1.,1.,1.);
+					if(uni_p==0)
+					{
+						gl_FragColor=vec4(1.-(nor.y+1.)*vec3(.1),.9);
+						return;
+					}
+					else if(uni_p==1)
+					{
+						gl_FragColor=vec4(sin(var_nor.y)*.5+.5,sin(var_nor.y+3.1415926/3.*2.)*.5+.5,sin(var_nor.y+3.1415926/3.*4.)*.5+.5,1.);
+						return;
+					}
+					else if(uni_p==2||uni_p==3)
+					{
+						float r=fract(sin(float(uni_ball))*48728.24+9713.45)*6.;
+						if(r<1.)b=vec3(1.,.0,.5);
+						else if(r<2.)b=vec3(1.,.5,.0);
+						else if(r<3.)b=vec3(.5,1.,.0);
+						else if(r<4.)b=vec3(.0,1.,.5);
+						else if(r<5.)b=vec3(.0,.5,1.);
+						else if(r<6.)b=vec3(.5,.0,1.);
+						if(uni_p==2)b=vec3(.7);//*=1.5;
+						if(uni_p==3)b=vec3(1.);//*=.5;
+					}
+					else
+					{
+						if(var_col.z<.5)
+						{
+							gl_FragColor=vec4(.9+vec3(dif1+dif2)*.1,.2);return;
+							// if(uni_p==10){gl_FragColor=vec4(.0,1.,.5,.1);return;}
+							// if(uni_p==11){gl_FragColor=vec4(1.,.0,.5,.1);return;}
+							// if(uni_p==12){gl_FragColor=vec4(.0,.5,1.,.1);return;}
+						}
+						else
+						{
+							if(uni_p==10)
+							{
+								float cl=clamp((sin(var_pos.x*80.-var_pos.y*8.)+cos(var_pos.y*80.))*4.+.5,0.,1.);
+								b=vec3(.0,1.-.5*cl,.5-.5*cl);
+								if(abs(normalize(var_nor).z)<.5)
+								{
+									b=vec3(.0,1.,.5);
+								}
+							}
+							else if(uni_p==11)
+							{
+								float cl=clamp((sin(var_pos.x*80.-var_pos.y*8.)+cos(var_pos.y*80.))*4.+.5,0.,1.);
+								b=vec3(1.-.5*cl,.0,.5-.5*cl);
+								if(abs(normalize(var_nor).z)<.5)
+								{
+									b=vec3(1.,.0,.5);
+								}
+							}
+							else if(uni_p==12)
+							{
+								float cl=clamp((sin(var_pos.x*80.-var_pos.y*8.)+cos(var_pos.y*80.))*4.+.5,0.,1.);
+								b=vec3(.0,.5-.5*cl,1.-.5*cl);
+								if(abs(normalize(var_nor).z)<.5)
+								{
+									b=vec3(.0,.5,1.);
+								}
+							}
+						}
 					}
 				}
 
-				col+=b*vec3(.9,.8,.7)*dif1;
+				col+=b*vec3(.9,.8,.7)*(dif1*.9+.1);
 				col+=vec3(.03)*spe1;
-				col+=b*vec3(.7,.8,.9)*dif2;
+				col+=b*vec3(.7,.8,.9)*(dif2*.9+.1);
 				col+=vec3(.03)*spe2;
 
 				gl_FragColor=vec4(col,1.);
@@ -142,6 +316,13 @@
 			gl.blendFuncSeparate(gl.SRC_ALPHA,gl.ONE_MINUS_SRC_ALPHA,gl.ONE,gl.ONE);
 
 			var prg=program("vert","frag");
+
+			var cfg=
+			{
+				lowFps:1,
+				color:15,
+				mouseCam:0,
+			}
 
 			function r(_i)
 			{
@@ -257,6 +438,9 @@
 				cha[15]=d.getDay();
 				cha[16]=d.getDay();
 				cha[17]=d.getDay();
+				cha[18]=0;
+				cha[19]=0;
+				cha[20]=0;
 				for(var c=0;c<21;c++)
 				{
 					if(tempCha[c]!=cha[c])
@@ -295,21 +479,21 @@
 
 				sphere(3,3,4,0);ibo[19]=create_ibo(index);index=[];
 				
-				p16s(70,.48,3);ibo[20]=create_ibo(index);index=[];
-				p16s(77,.48,3);ibo[21]=create_ibo(index);index=[];
-				p16s(83,.48,3);ibo[22]=create_ibo(index);index=[];
+				p16s(70,.48,18);ibo[20]=create_ibo(index);index=[];
+				p16s(77,.48,19);ibo[21]=create_ibo(index);index=[];
+				p16s(83,.48,20);ibo[22]=create_ibo(index);index=[];
 
 				function p16s(_i,_g,_n)
 				{
 					var s=[1*_g,2*_g,.3*_g];
 
 					var a=isHot(_i);
-					for(var c=0;c<21-ani[_n]/2;c++)
+					for(var c=0;c<16-ani[_n]/(2-cfg.lowFps);c++)
 					{
 						a[c]=1-a[c];
 					}
 					poly16seg(a,s,.1,1);
-					for(var c=0;c<21;c++)
+					for(var c=0;c<16;c++)
 					{
 						a[c]=1-a[c];
 					}
@@ -353,11 +537,24 @@
 				setAtt('att_nor',nor,3);
 				setAtt('att_col',col,3);
 
-				for(var c=0;c<18;c++)
+				for(var c=0;c<21;c++)
 				{
 					ani[c]++;
-					if(3<c&&c<6)ani[c]+=3;
+					if(3<c&&c<6)ani[c]+=3-cfg.lowFps;
 				}
+			}
+
+			var mouseX=0,mouseY=0;
+
+			window.onmousemove=function(e)
+			{
+				mouseX=e.clientX-window.innerWidth/2;
+				mouseY=e.clientY-window.innerHeight/2;
+			}
+
+			window.onkeydown=function(k)
+			{
+				cfg.color=(++cfg.color)%20;
 			}
 
 			var t=0,
@@ -375,12 +572,18 @@
 					gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
 
 					var camPos=[0,0,13];
+					if(cfg.mouseCam)
+					{
+						camPos=M.vector(M.rotate([0,1,0],-mouseX*.001),camPos);
+						camPos=M.vector(M.rotate([1,0,0],-mouseY*.001),camPos);
+					}
 					var matM;
 					var matV=M.lookAt(camPos,[0,0,0],[0,1,0]);
 					var matP=M.perspective(70,cvs.width/cvs.height,.1,100);
 
 					gl.uniform1f(gl.getUniformLocation(prg,'uni_t'),t);
 					gl.uniform2fv(gl.getUniformLocation(prg,'uni_s'),[cvs.width,cvs.height]);
+					gl.uniform1i(gl.getUniformLocation(prg,'uni_col'),cfg.color);
 					gl.uniform3fv(gl.getUniformLocation(prg,'uni_eye'),camPos);
 					gl.uniformMatrix4fv(gl.getUniformLocation(prg,'uni_matV'),false,matV);
 					gl.uniformMatrix4fv(gl.getUniformLocation(prg,'uni_matP'),false,matP);
@@ -393,14 +596,27 @@
 					gl.uniform1i(gl.getUniformLocation(prg,'uni_p'),1);
 					gl.drawElements(gl.LINE_STRIP,ibo[0].length,gl.UNSIGNED_SHORT,0);
 
-					var matTime=M.multiply(M.translate([1.5,0,7]),M.rotate([0,1,0],-.1));
-					var matDate=M.multiply(M.translate([-2.5,-1.3,7]),M.rotate([0,1,0],.1));
-					var matFMS=M.multiply(M.translate([-3.2,1.06,7]),M.rotate([0,1,0],.1));
+					for(var c=0;c<20;c++)
+					{
+						gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER,ibo[19]);
+						matM=M.rotate([r(c+126)-.5,r(c+127)-.5,r(c+128)-.5],t*.002*(r(c+54)+1)+r(c+55)*999+spin); // 自転
+						matM=M.multiply(M.translate([0,0,0]),matM);
+						gl.uniformMatrix4fv(gl.getUniformLocation(prg,'uni_matM'),false,matM);
+						gl.uniform1i(gl.getUniformLocation(prg,'uni_ball'),c);
+						gl.uniform1i(gl.getUniformLocation(prg,'uni_p'),2);
+						gl.drawElements(gl.LINE_STRIP,ibo[19].length,gl.UNSIGNED_SHORT,0);
+						gl.uniform1i(gl.getUniformLocation(prg,'uni_p'),3);
+						gl.drawElements(gl.TRIANGLES,ibo[19].length,gl.UNSIGNED_SHORT,0);
+					}
+
+					var matTime=M.multiply(M.translate([1.7,0,7]),M.rotate([0,1,0],-.1));
+					var matDate=M.multiply(M.translate([-2.6,-1.3,7]),M.rotate([0,1,0],.1));
+					var matFMS=M.multiply(M.translate([-3.3,1.06,7]),M.rotate([0,1,0],.1));
 					function matAni(_c,_d)
 					{
 						var m=M.identity();
-						m=M.multiply(M.rotate([.1,1,0],Math.pow(.9,ani[_c])*Math.PI*2),m); // 文字スピン
-						m=M.multiply(M.rotate(M.vector(M.rotate([.4,0,.6],t*.01+_d*.1),[.2,1,0]),.0),m); // 文字揺らし
+						m=M.multiply(M.rotate([.1,1,0],Math.pow(.9-cfg.lowFps*.1,ani[_c])*Math.PI),m); // 文字スピン
+						m=M.multiply(M.rotate(M.vector(M.rotate([.4,0,.6],t*.03+_d*.1),[.2,1,0]),.1),m); // 文字揺らし
 						return m;
 					}
 
@@ -470,22 +686,10 @@
 						gl.drawElements(gl.TRIANGLES,ibo[c+16].length,gl.UNSIGNED_SHORT,0);
 					}
 
-					for(var c=0;c<20;c++)
-					{
-						gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER,ibo[19]);
-						matM=M.rotate([r(c+126)-.5,r(c+127)-.5,r(c+128)-.5],t*.004*(r(c+54)+1)+r(c+55)*999+spin*3); // 自転
-						matM=M.multiply(M.translate([0,0,0]),matM);
-						gl.uniformMatrix4fv(gl.getUniformLocation(prg,'uni_matM'),false,matM);
-						gl.uniform1i(gl.getUniformLocation(prg,'uni_p'),2);
-						gl.drawElements(gl.LINE_STRIP,ibo[19].length,gl.UNSIGNED_SHORT,0);
-						gl.uniform1i(gl.getUniformLocation(prg,'uni_p'),3);
-						gl.drawElements(gl.TRIANGLES,ibo[19].length,gl.UNSIGNED_SHORT,0);
-					}
-
 					for(var c=0;c<3;c++)
 					{
 						gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER,ibo[c+20]);
-						matM=matAni(3,c+18);
+						matM=matAni(c+18,c+18);
 						matM=M.multiply(M.translate([c*1.2,0,0]),matM); // 文字を配置
 						matM=M.multiply(matFMS,matM); // 全体を配置
 						gl.uniformMatrix4fv(gl.getUniformLocation(prg,'uni_matM'),false,matM);
@@ -512,7 +716,7 @@
 
 			function info()
 			{
-				document.getElementById("info").innerHTML="<span style=\"font-size:24px\">16 Segment Clock</span><br>Resolution : "+window.innerWidth+" x "+window.innerHeight+"<br>Frame : "+t+"<br>FPS : "+calcFps()+""
+				document.getElementById("info").innerHTML="<span style=\"font-size:24px\">16 Segment Clock</span><br>Resolution : "+window.innerWidth+" x "+window.innerHeight+"<br>Frame : "+t+"<br>FPS : "+calcFps()+"<br><a target='_blank' href='http://twitter.com/FMS_Cat'>@FMS_Cat</a>"
 			}
 
 			function poly(_i,_c)
