@@ -170,7 +170,7 @@
 					if(uni_p==0)
 					{
 						float s=0.;
-						if(mod(gl_FragCoord.x/uni_s.x*960.+gl_FragCoord.y/uni_s.x*960.+uni_t+uni_spin*80.,16.)<8.){s=.5;}
+						if(mod(gl_FragCoord.x+gl_FragCoord.y+uni_t+uni_spin*80.,16.)<8.){s=.5;}
 						gl_FragColor=vec4(s)*cv;
 					}
 					if(uni_p==1)
@@ -208,8 +208,8 @@
 						if(uni_col==22||uni_col==23)
 						{
 							float s=0.;
-							if(mod(gl_FragCoord.x/uni_s.x*960.+gl_FragCoord.y/uni_s.x*960.+uni_t+uni_spin*80.,24.)<12.){s=1.;}
-							if(mod(gl_FragCoord.x/uni_s.x*960.-gl_FragCoord.y/uni_s.x*960.,24.)<12.){s=1.-s;}
+							if(mod(gl_FragCoord.x+gl_FragCoord.y+uni_t+uni_spin*80.,24.)<12.){s=1.;}
+							if(mod(gl_FragCoord.x-gl_FragCoord.y,24.)<12.){s=1.-s;}
 							if(uni_col==22)gl_FragColor=vec4(vec3(.8,.0,.2)*(s*.2+.2),1.);
 							if(uni_col==23)gl_FragColor=vec4(vec3(.5,.4,.3)*(s*.2+.2),1.);
 						}
