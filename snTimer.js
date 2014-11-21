@@ -77,7 +77,7 @@ var snTimer=
 	startTime:0,
 	time:0,
 	acc:0,
-	threshold:.3,
+	threshold:.2,
 
 	do:function(_0,_2,_5)
 	{
