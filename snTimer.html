@@ -782,6 +782,11 @@
 				str+="Resolution : "+window.innerWidth+" x "+window.innerHeight+"<br>";
 				str+="Frame : "+t+"<br>";
 				str+="FPS : "+calcFps()+"<br>";
+				str+="SN Slide : "+controller.axes[0]+"<br>";
+				str+="SN Spin : "+controller.axes[5]+"<br>";
+				str+="SN Push : "+controller.axes[2]+"<br>";
+				str+="SN Button : "+controller.button[0].value+"<br>";
+				str+="FPS : "+calcFps()+"<br>";
 				str+="<a target='_blank' href='http://twitter.com/FMS_Cat'>@FMS_Cat</a>";
 
 				document.getElementById("info").innerHTML=str;
