@@ -77,10 +77,11 @@ var snTimer=
 	startTime:0,
 	time:0,
 	acc:0,
+	threshold:.5,
 
 	do:function(_0,_2,_5)
 	{
-		if(_0<-.2)
+		if(_0<-1*this.threshold)
 		{
 			if(!this.slide&&!this.isMove)
 			{
@@ -90,7 +91,7 @@ var snTimer=
 				this.mode=false;
 			}
 		}
-		else if(.2<_0)
+		else if(this.threshold<_0)
 		{
 			if(!this.slide&&!this.isMove)
 			{
@@ -105,7 +106,7 @@ var snTimer=
 			this.slide=false;
 		}
 
-		if(_5<-.2)
+		if(_5<-1*this.threshold)
 		{
 			if(!this.spin&&!this.isMove)
 			{
@@ -116,7 +117,7 @@ var snTimer=
 			}
 			this.acc-=.003-this.acc*.01;
 		}
-		else if(.2<_5)
+		else if(this.threshold<_5)
 		{
 			if(!this.spin&&!this.isMove)
 			{
@@ -138,7 +139,7 @@ var snTimer=
 
 		if(this.time<0)this.time=0;
 
-		if(.2<_2)
+		if(this.threshold<_2)
 		{
 			if(!this.push)
 			{
@@ -160,7 +161,7 @@ var snTimer=
 				this.push=true;
 			}
 		}
-		else if(_2<-.2)
+		else if(_2<-1*this.threshold)
 		{
 			if(!this.push&&!this.isMove)
 			{
