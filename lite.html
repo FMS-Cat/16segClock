@@ -369,7 +369,7 @@
 						gl.uniform1i(loc_p,3);
 						gl.drawElements(gl.TRIANGLES,ibo[19].length,gl.UNSIGNED_SHORT,0);
 					}
-					
+
 					function drawSegment(_i,_p)
 					{
 						var a=isHot(cha[_i]);
@@ -646,6 +646,11 @@
 			}
 			resize();
 			window.onresize=resize;
+
+			document.addEventListener( 'touchstart', function(){
+				cvs.requestFullScreen = cvs.requestFullScreen || cvs.mozRequestFullScreen || cvs.webkitRequestFullScreen;
+				cvs.requestFullScreen();
+			} );
 		</script>
 	</body>
 </html>
