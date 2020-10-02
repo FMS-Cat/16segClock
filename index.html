@@ -500,10 +500,13 @@
 
 			var mouseX=0,mouseY=0;
 
-			var cfg=
-			{
+			var cfgLocalStorage=localStorage.getItem('cfg');
+			var cfg=cfgLocalStorage && JSON.parse(cfgLocalStorage) || {
 				bg:1,
 				color:0,
+				help:0.5,
+				info:0.5,
+				mouse:1,
 				res:1,
 			}
 
@@ -527,10 +530,12 @@
 
 				if(key[66]==1){cfg.bg=mouseX<.5?0:1;}
 				if(key[67]==1){cfg.color=mouseX*24}
-				if(key[72]==1){document.getElementById("help").style.opacity=mouseX;}
-				if(key[73]==1){document.getElementById("info").style.opacity=mouseX;}
-				if(key[77]==1){document.body.style.cursor=mouseX<.5?"none":"auto";}
+				if(key[72]==1){cfg.help=mouseX;}
+				if(key[73]==1){cfg.info=mouseX;}
+				if(key[77]==1){cfg.mouse=mouseX<.5?0:1;}
 				if(key[82]==1){cfg.res=Math.pow(2,Math.floor(mouseX*10));resize();}
+
+				localStorage.setItem('cfg', JSON.stringify(cfg));
 			}
 
 			var t=0,
@@ -554,6 +559,10 @@
 			function disp()
 			{
 				animate();
+
+				document.getElementById("help").style.opacity=cfg.help;
+				document.getElementById("info").style.opacity=cfg.info;
+				document.body.style.cursor=cfg.mouse<.5?"none":"auto";
 
 				{
 					gl.clearColor(0.,0.,0.,0.);
