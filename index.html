@@ -624,7 +624,7 @@
 						}
 					}
 
-					var matTime=M.multiply(camRotate,M.multiply(M.translate([1.7,0,7]),M.rotate([0,1,0],-.2)));
+					var matTime=M.multiply(camRotate,M.multiply(M.translate([1.5,0,7]),M.rotate([0,1,0],-.2)));
 					var matDate=M.multiply(camRotate,M.multiply(M.translate([-2.6,1.06,7]),M.rotate([0,1,0],.2)));
 					var matDay=M.multiply(camRotate,M.multiply(M.translate([-3.4,-1.3,7]),M.rotate([0,1,0],.2)));
 
@@ -649,8 +649,8 @@
 					for(var c=0;c<2;c++)
 					{
 						matM=matAni(c+4,c+4);
-						matM=M.multiply(M.scale([.2,.2,.2]),matM);
-						matM=M.multiply(M.translate([c*.5+1.8,-2.5,0]),matM); // 文字を配置
+						matM=M.multiply(M.scale([.35,.35,.35]),matM);
+						matM=M.multiply(M.translate([c*.8+2.0,-2.2,0]),matM); // 文字を配置
 						matM=M.multiply(matTime,matM); // 全体を配置
 						gl.uniformMatrix4fv(loc_matM,false,matM);
 						drawSegment(c+4,10);
